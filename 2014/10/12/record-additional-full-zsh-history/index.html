@@ -62,30 +62,30 @@
 
   <article class="post-content">
   <p>I like to keep my shell history free of duplicates and limited size (so
-I don&#39;t have to manually rotate it). However, after reading <a href="http://blog.stephenwolfram.com/2012/03/the-personal-analytics-of-my-life">that
+I don&rsquo;t have to manually rotate it). However, after reading <a href="http://blog.stephenwolfram.com/2012/03/the-personal-analytics-of-my-life">that
 Stephen Wolfram
 post</a>
 from my <a href="../../../../2014/10/08/things-that-are-cool-analysing-your-life">last
 post</a>,
-I&#39;ve realised just how much I want to see my full command history: the
-embarrassing misspellings, the endless lines of <code>cd</code> and <code>ls</code>... It&#39;s a
+I&rsquo;ve realised just how much I want to see my full command history: the
+embarrassing misspellings, the endless lines of <code>cd</code> and <code>ls</code>&hellip; It&rsquo;s a
 neat idea, I want to be able to analyse how I use my computer(s).</p>
 
 <p>I did <strong>not</strong> want to change how my actual shell history was stored,
-since I didn&#39;t have a problem with it. So somehow, I would have to store
+since I didn&rsquo;t have a problem with it. So somehow, I would have to store
 all commands I type in a separate file, and preferably easily because I
 am an incredibly lazy hacker. Hmm. (This is where <code>zsh</code> comes in.)</p>
 
 <p>For those of you who use it, it should come as no surprise that <code>zsh</code>
 does indeed have a feature for this. <code>zsh</code> has some special functions
 you can define which are run on certain events. The <code>zshaddhistory</code>
-function is executed <em>&quot;when a history line has been read interactively,
-but before it is executed&quot;</em> according to its entry in <code>zshmisc</code>. Any
+function is executed <em>&ldquo;when a history line has been read interactively,
+but before it is executed&rdquo;</em> according to its entry in <code>zshmisc</code>. Any
 time you write a command which <code>zsh</code> can parse, this function will be
-run, as long as you&#39;ve defined it.</p>
+run, as long as you&rsquo;ve defined it.</p>
 
 <p>So all we have to do is get <code>zshaddhistory</code> to write the argument it
-gets to a file. I&#39;d also like to record the current date and time,
+gets to a file. I&rsquo;d also like to record the current date and time,
 because I want to do more than simply count my commands. This is almost
 <em>too easy</em>. To your <code>.zshrc</code>, add:</p>
 
@@ -115,25 +115,27 @@ history. To fix this, we can use another special <code>zsh</code> function,
 
 <p>Add that to your <code>.zshrc</code> too, and every time you exit the shell,
 <code>!EXIT!</code> will be added to your full history log. I chose that string
-because it&#39;s unlikely to ever be added to the history, since the &#39;!&#39;
+because it&rsquo;s unlikely to ever be added to the history, since the &rsquo;!&rsquo;
 will cause a parse error. If you ever exit the shell with the <code>exit</code>
-command, then you&#39;ll get this line right after without a date before it.</p>
+command, then you&rsquo;ll get this line right after without a date before it.</p>
 
 <p>Some example history could be:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">1413054363 ls
+
+<pre><code>1413054363 ls
 1413054364 exit
 !EXIT!
 1413054368 !EXIT!
 1413054377 tail $HOME/.zsh_full_history
-</code></pre></div>
+</code></pre>
+
 <p>You can see that there were 2 exits there: the first done using the
 <code>exit</code> command, and the second 4 seconds after by Ctrl-D. Originally,
 all that mattered to me was that Ctrl-D lines could be easily skipped
-programatically -- but this also records the time at which you exit a
+programatically &ndash; but this also records the time at which you exit a
 shell, which might be cool to look at.</p>
 
-<p><em>2014-10-14 edit: I have found that occasionally <code>!EXIT!</code> will *</em>not**
-have a date put before it &gt;:( -- I fixed this by appending the date
+<p><em>2014-10-14 edit: I have found that occasionally <code>!EXIT!</code> will **not</em>*
+have a date put before it &gt;:( &ndash; I fixed this by appending the date
 after !EXIT! every time:*</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">zshexit<span class="o">()</span> <span class="o">{</span>
@@ -145,15 +147,15 @@ the end (usually the same, though rarely a second later), but that can
 just be disregarded when looking at it. It at least means that *</em>all**
 exit lines have a date attached.*</p>
 
-<p>... Now I feel it&#39;s not complete, that I need to log when shells start
-too. This is pretty simple, as you&#39;d imagine: since <code>.zshrc</code> is read by
+<p>&hellip; Now I feel it&rsquo;s not complete, that I need to log when shells start
+too. This is pretty simple, as you&rsquo;d imagine: since <code>.zshrc</code> is read by
 interactive shells on startup, we add just one line to it:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">&quot;$(date &quot;</span>+%s<span class="s2">&quot;) !START!&quot;</span> &gt;&gt; <span class="s2">&quot;$HOME/.zsh_full_history&quot;</span></code></pre></div>
 
-<p>And that&#39;s that! Now you can be safe in the knowledge that your shell
+<p>And that&rsquo;s that! Now you can be safe in the knowledge that your shell
 history is being logged, if that makes you feel safe for any reason.
-Eventually I&#39;ll write a program to parse and analyse the log to get some
+Eventually I&rsquo;ll write a program to parse and analyse the log to get some
 nice figures.</p>
 
 <p>(The examples in this post are not identical to what is in my <code>.zshrc</code>:

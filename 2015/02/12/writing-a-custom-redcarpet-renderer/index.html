@@ -61,13 +61,13 @@
   </header>
 
   <article class="post-content">
-  <h2>Introduction</h2>
+  <h2 id="introduction">Introduction</h2>
 
-<p>When I&#39;m writing I don&#39;t like interrupting my train of thought. It
-easily occurs when I decide &quot;ooh, this is a nice song, let me Google the
-artist&quot; or when I&#39;m experiencing <a href="!Wikipedia">presque vu</a> and resolve to
+<p>When I&rsquo;m writing I don&rsquo;t like interrupting my train of thought. It
+easily occurs when I decide &ldquo;ooh, this is a nice song, let me Google the
+artist&rdquo; or when I&rsquo;m experiencing <a href="http://en.wikipedia.org/wiki/presque vu" title="Wikipedia: presque vu">presque vu</a> and resolve to
 find a more fitting word (I had to Google for that word, by the way).
-Another of the more irritating issues I&#39;ve had is linking to pages in my
+Another of the more irritating issues I&rsquo;ve had is linking to pages in my
 writing. I frequently link to two websites in particular,
 <a href="https://github.com">GitHub</a> and <a href="https://en.wikipedia.org">Wikipedia</a>.
 Having to Google the page I want, click on it, copy the URL and finally
@@ -76,59 +76,65 @@ up browsing the Internet.</p>
 
 <p><a href="http://gwern.net">Gwern</a>, a writer I follow who writes extensively in
 almost uncountable disciplines, keeps the source for his website in a
-GitHub repo at <a href="!GitHub">gwern/gwern.net</a>. By checking a few pages I
+GitHub repo at <a href="https://github.com/gwern/gwern.net" title="GitHub: gwern/gwern.net">gwern/gwern.net</a>. By checking a few pages I
 learn how he frequently links to <a href="http://www.gwern.net/haskell/Wikipedia%20Archive%20Bot">five or more Wikipedia pages in one
-sentence</a>: he doesn&#39;t write a URL, instead linking to
-<code>(!Wikipedia)</code>. Clearly there&#39;s some clever stuff going on here.</p>
+sentence</a>: he doesn&rsquo;t write a URL, instead linking to
+<code>(!Wikipedia)</code>. Clearly there&rsquo;s some clever stuff going on here.</p>
 
-<p>His <a href="!GitHub" title="gwern/gwern.net/blob/master/hakyll.hs">Hakyll configuration file</a> has some stuff about so
-called <a href="!GitHub" title="gwern/gwern.net/blob/master/hakyll.hs#L117">&#39;interwiki links&#39;</a>. The actual processing
-happens in <a href="!GitHub" title="gwern/gwern.net/blob/master/haskell/interwiki-compile.hs">haskell/interwiki-compile.hs</a>, and it&#39;s... pretty
-unreadable if you&#39;re like me and don&#39;t know Haskell. But the abstract
+<p>His <a href="https://github.com/gwern/gwern.net/blob/master/hakyll.hs" title="GitHub: gwern/gwern.net/blob/master/hakyll.hs">Hakyll configuration file</a> has some stuff about so
+called <a href="https://github.com/gwern/gwern.net/blob/master/hakyll.hs#L117" title="GitHub: gwern/gwern.net/blob/master/hakyll.hs#L117">&lsquo;interwiki links&rsquo;</a>. The actual processing
+happens in <a href="https://github.com/gwern/gwern.net/blob/master/haskell/interwiki-compile.hs" title="GitHub: gwern/gwern.net/blob/master/haskell/interwiki-compile.hs">haskell/interwiki-compile.hs</a>, and it&rsquo;s&hellip; pretty
+unreadable if you&rsquo;re like me and don&rsquo;t know Haskell. But the abstract
 idea is very simple: rather than linking to a page, you specify the
-<em>website name</em> and a <em>query</em> (e.g. the Wikipedia page on <a href="!Wikipedia">Stanley
+<em>website name</em> and a <em>query</em> (e.g. the Wikipedia page on <a href="http://en.wikipedia.org/wiki/Stanley
+Kubrick" title="Wikipedia: Stanley
+Kubrick">Stanley
 Kubrick</a>) and a link to the website with the query is formed
 in the HTML. By using this simple short syntax, you can link to pages
-much more fluidly and with hardly a second&#39;s interruption, though using
-non-canonical Markdown syntax. (Then again, if you&#39;re using Jekyll, you
-likely don&#39;t care about that.)</p>
+much more fluidly and with hardly a second&rsquo;s interruption, though using
+non-canonical Markdown syntax. (Then again, if you&rsquo;re using Jekyll, you
+likely don&rsquo;t care about that.)</p>
 
-<p>Gwern <a href="!GitHub" title="jgm/gitit/blob/master/plugins/Interwiki.hs">originally wrote the function</a> to make it easier
-to create links between public <a href="!Wikipedia" title="Wiki">wikis</a> on the
+<p>Gwern <a href="https://github.com/jgm/gitit/blob/master/plugins/Interwiki.hs" title="GitHub: jgm/gitit/blob/master/plugins/Interwiki.hs">originally wrote the function</a> to make it easier
+to create links between public <a href="http://en.wikipedia.org/wiki/Wiki" title="Wikipedia: Wiki">wikis</a> on the
 Internet. I wanted to generalise it further and allow whatever
-&#39;interwiki links&#39; you wanted. I named these links <strong>shortlinks</strong> because
-hey, they&#39;re links but a bit shorter.</p>
+&#39;interwiki links&rsquo; you wanted. I named these links <strong>shortlinks</strong> because
+hey, they&rsquo;re links but a bit shorter.</p>
 
-<h2>Implementation</h2>
+<h2 id="implementation">Implementation</h2>
 
 <p>Now the question is posed: how to implement shortlink conversion?
-I tried writing a <a href="!GitHub" title="raehik/mdwiki-preprocess">Markdown
+I tried writing a <a href="https://github.com/raehik/mdwiki-preprocess" title="GitHub: raehik/mdwiki-preprocess">Markdown
 preprocessor</a> before and it soon
-became clear that I&#39;d have to write a full Markdown parser to understand
+became clear that I&rsquo;d have to write a full Markdown parser to understand
 where not to convert shortlinks. I chose to write a custom RedCarpet
-renderer since it&#39;s the converter I use for general use (TODO) and
-Jekyll. After a bit of reading on the <a href="!GitHub" title="vmg/redcarpet">RedCarpet GitHub
+renderer since it&rsquo;s the converter I use for general use (TODO) and
+Jekyll. After a bit of reading on the <a href="https://github.com/vmg/redcarpet" title="GitHub: vmg/redcarpet">RedCarpet GitHub
 repo</a> I found it reasonably straightforward how
 to create one.</p>
 
 <p>The specification for my shortlink renderer follows:</p>
 
 <ul>
-<li>Valid shortlinks begin with an identifier string (I&#39;m using Gwern&#39;s
-&#39;!&#39;) and exist in the hash which maps website names to URLs.</li>
+<li>Valid shortlinks begin with an identifier string (I&rsquo;m using Gwern&rsquo;s
+&rsquo;!&rsquo;) and exist in the hash which maps website names to URLs.</li>
 <li>Shortlinks are converted to links which combines the query string
 with the website URL.</li>
 </ul>
 
-<p>If possible, I also wanted to implement another feature Gwern&#39;s syntax
+<p>If possible, I also wanted to implement another feature Gwern&rsquo;s syntax
 has, which is that <em>links with an empty link</em> (i.e. just a title) are
 converted to links pointing to the title. For example:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">[i/relative-img.png]()
-</code></pre></div>
+
+<pre><code>[i/relative-img.png]()
+</code></pre>
+
 <p>would be treated as</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">[i/relative-img.png](i/relative-img.png)
-</code></pre></div>
-<p>I don&#39;t want to change anything else in the Markdown conversion.</p>
+
+<pre><code>[i/relative-img.png](i/relative-img.png)
+</code></pre>
+
+<p>I don&rsquo;t want to change anything else in the Markdown conversion.</p>
 
 <p>RedCarpet lets you extend the default renderer, and some impressive Ruby
 magic allows you to override only the parts of syntax you want to change
@@ -147,39 +153,43 @@ shortlinks, I could write this:</p>
 edit the link to form if one is present and return an <code>&lt;a&gt;</code> tag. Pretty
 simple!</p>
 
-<p>The only gripe with overriding Redcarpet&#39;s HTML renderer is that you
-can&#39;t use the original method using <code>super</code> because, as I mentioned
-before, it&#39;s written in C with a Ruby API. Luckily in this case it&#39;s no
+<p>The only gripe with overriding Redcarpet&rsquo;s HTML renderer is that you
+can&rsquo;t use the original method using <code>super</code> because, as I mentioned
+before, it&rsquo;s written in C with a Ruby API. Luckily in this case it&rsquo;s no
 issue, because <code>&lt;a&gt;</code> tags are simple to form.</p>
 
-<h2>My shortlink renderer</h2>
+<h2 id="my-shortlink-renderer">My shortlink renderer</h2>
 
-<p>My renderer at <a href="!GitHub">raehik/redcarpet-shortlink</a> does the shortlink
+<p>My renderer at <a href="https://github.com/raehik/redcarpet-shortlink" title="GitHub: raehik/redcarpet-shortlink">raehik/redcarpet-shortlink</a> does the shortlink
 processing and also checks for empty links. I also copied the rest of
-Gwern&#39;s features such as forming a title for shortlinks and letting you
+Gwern&rsquo;s features such as forming a title for shortlinks and letting you
 choose a custom query by setting a title for the shortlink. For example:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">[raehik/redcarpet-shortlink](!GitHub)
-</code></pre></div>
+
+<pre><code>[raehik/redcarpet-shortlink](!GitHub)
+</code></pre>
+
 <p>would become</p>
 
 <div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;https://github.com/raehik/redcarpet-shortlink&quot;</span> <span class="na">title=</span><span class="s">&quot;GitHub: raehik/redcarpet-shortlink&quot;</span><span class="nt">&gt;</span>raehik/redcarpet-shortlink<span class="nt">&lt;/a&gt;</span></code></pre></div>
 
 <p>while</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">[My shortlink renderer](!GitHub &quot;raehik/redcarpet-shortlink&quot;)
-</code></pre></div>
+
+<pre><code>[My shortlink renderer](!GitHub &quot;raehik/redcarpet-shortlink&quot;)
+</code></pre>
+
 <p>is converted to</p>
 
 <div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;https://github.com/raehik/redcarpet-shortlink&quot;</span> <span class="na">title=</span><span class="s">&quot;GitHub: raehik/redcarpet-shortlink&quot;</span><span class="nt">&gt;</span>My shortlink renderer<span class="nt">&lt;/a&gt;</span></code></pre></div>
 
 <p>Since the <code>link</code> method I wrote must override all of the processing
-originally done by the C HTML renderer, I&#39;ve tried to make sure normal
-links are formed identically (or at least correctly). So far I&#39;m quite
-sure my renderer hasn&#39;t formed a bad link, but I&#39;m not very sure about
-HTML-escaping. If you find any bugs, please <a href="!GitHub" title="raehik/redcarpet-shortlink/issues">create an
+originally done by the C HTML renderer, I&rsquo;ve tried to make sure normal
+links are formed identically (or at least correctly). So far I&rsquo;m quite
+sure my renderer hasn&rsquo;t formed a bad link, but I&rsquo;m not very sure about
+HTML-escaping. If you find any bugs, please <a href="https://github.com/raehik/redcarpet-shortlink/issues" title="GitHub: raehik/redcarpet-shortlink/issues">create an
 issue</a> on the GitHub repo.</p>
 
 <p><em>(Note: I tried to use shortlinks as much as possible in this post.
-<a href="!GitHub" title="raehik/raehik.github.io/blob/master/_posts/2015-02-12-writing-a-custom-redcarpet-renderer.md">Read the source</a> if you&#39;d like to see all the occurences.)</em></p>
+<a href="https://github.com/raehik/raehik.github.io/blob/master/_posts/2015-02-12-writing-a-custom-redcarpet-renderer.md" title="GitHub: raehik/raehik.github.io/blob/master/_posts/2015-02-12-writing-a-custom-redcarpet-renderer.md">Read the source</a> if you&rsquo;d like to see all the occurences.)</em></p>
 
   </article>
 

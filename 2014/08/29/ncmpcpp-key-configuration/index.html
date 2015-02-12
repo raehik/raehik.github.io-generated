@@ -63,7 +63,7 @@
   <article class="post-content">
   <p><em>EDIT: hah, imagine that: just a week after I post this, the Arch Linux repo
        updates to the <code>0.6_beta2</code> release, which totally obsoletes this whole
-       post. of course, it&#39;s not really a bad thing: the new keybinding system
+       post. of course, it&rsquo;s not really a bad thing: the new keybinding system
        is a *lot</em> more flexible. going to make a post on all the improvements,
        so stay tuned!*</p>
 
@@ -73,32 +73,38 @@ and looks okay too.</p>
 
 <p>However, I had some troubles with key configuration. <code>ncmpcpp</code> allows you to
 bind a maximum of 2 keys to a command, which is nice. You can define a key
-by either the character (e.g. &#39;g&#39;, &#39;F&#39;) or a decimal value. But annoyingly, it
-doesn&#39;t explain where the decimal value <em>comes</em> from for each key.</p>
+by either the character (e.g. &lsquo;g&rsquo;, &#39;F&rsquo;) or a decimal value. But annoyingly, it
+doesn&rsquo;t explain where the decimal value <em>comes</em> from for each key.</p>
 
-<p>I believe it is <em>completely undocumented</em> that <strong>ncmpcpp&#39;s key configuration
+<p>I believe it is <em>completely undocumented</em> that <strong>ncmpcpp&rsquo;s key configuration
 uses ASCII key codes.</strong> So, if you wanted to bind the Escape key to the
-<code>key_quit</code> command (mapped to &#39;q&#39; and &#39;Q&#39; by default), then you might follow
+<code>key_quit</code> command (mapped to &#39;q&rsquo; and &#39;Q&rsquo; by default), then you might follow
 this procedure:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">$ showkey -a # show ASCII codes
+
+<pre><code>$ showkey -a # show ASCII codes
 
 Press any keys - Ctrl-D wil terminate this program
 
 ^[       27 0033 0x1b
-</code></pre></div>
+</code></pre>
+
 <p>Ah, so the ASCII code for Escape is 27. (You could alternatively check on a
 website such as <a href="http://www.ascii-code.com">ascii-code.com</a>.)</p>
 
-<p>Now go into your <code>~/.ncmpcpp/keys</code> file (if it doesn&#39;t exist, I suggest copying
-the template from <code>/usr/share/doc/ncmpcpp/keys</code> -- or grab my one from
+<p>Now go into your <code>~/.ncmpcpp/keys</code> file (if it doesn&rsquo;t exist, I suggest copying
+the template from <code>/usr/share/doc/ncmpcpp/keys</code> &ndash; or grab my one from
 <a href="https://github.com/raehik/dotfiles">raehik/dotfiles</a>!) and add this line:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">key_quit = 27
-</code></pre></div>
-<p>And that&#39;s that. <code>ncmpcpp</code> will now quit if you hit Escape instead of &#39;q&#39;. My
-reason for doing this was actually binding &#39;q&#39; <strong>and</strong> Escape to quit, so my
+
+<pre><code>key_quit = 27
+</code></pre>
+
+<p>And that&rsquo;s that. <code>ncmpcpp</code> will now quit if you hit Escape instead of &#39;q&rsquo;. My
+reason for doing this was actually binding &#39;q&rsquo; <strong>and</strong> Escape to quit, so my
 line looks like this:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">key_quit = &#39;q&#39; 27
-</code></pre></div>
+
+<pre><code>key_quit = &#39;q&#39; 27
+</code></pre>
+
   </article>
 
 </div>

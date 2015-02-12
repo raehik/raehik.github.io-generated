@@ -61,17 +61,17 @@
   </header>
 
   <article class="post-content">
-  <p>I&#39;m having fun with <a href="https://github.com/vimwiki/vimwiki">vimwiki</a> at the moment. It&#39;s an interesting Vim
+  <p>I&rsquo;m having fun with <a href="https://github.com/vimwiki/vimwiki">vimwiki</a> at the moment. It&rsquo;s an interesting Vim
 plugin which turns your editor into not only a wiki editor, but a viewer
-as well. Here&#39;s what I mean:</p>
+as well. Here&rsquo;s what I mean:</p>
 
 <p><img src="/assets/vimwiki-example.png" alt="vimwiki example"></p>
 
 <p>The coolest thing about vimwiki is its automatic line squashing. All
 lines except the current one have their formatting syntax removed,
 leaving just the text &amp; formatting. Links are also squashed down into
-just the link text, which is <em>really</em> cool. I&#39;ll admit I don&#39;t like
-those features all the time -- but it&#39;s also pretty undeniably cool for
+just the link text, which is <em>really</em> cool. I&rsquo;ll admit I don&rsquo;t like
+those features all the time &ndash; but it&rsquo;s also pretty undeniably cool for
 a Vim plugin.</p>
 
 <p>The other really nice features are the clever new file-making. By simply
@@ -80,28 +80,30 @@ mode) you make it a link to a corresponding wiki page. Hitting Enter on
 a wiki link follows that link, then you can go back to the previous
 file (and keep your cursor location!) by hitting Backspace.</p>
 
-<p>However, I feel it&#39;s a little let down by its awkward syntax. vimwiki
+<p>However, I feel it&rsquo;s a little let down by its awkward syntax. vimwiki
 comes with its own syntax by default which has some gripes and is just
-dissimilar to Markdown enough that I don&#39;t feel comfortable using it.
+dissimilar to Markdown enough that I don&rsquo;t feel comfortable using it.
 The Markdown support is subpar (even though many of the squashing
-features still work partially) and by default overrides Vim&#39;s Markdown
+features still work partially) and by default overrides Vim&rsquo;s Markdown
 syntax highlighting, which works a lot better.</p>
 
 <p>I was quite amused when I found I could fix some of the Markdown issues
-by literally <code>cat</code>ing the normal Markdown syntax into vimwiki&#39;s:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">cat /usr/share/vim/vim74/markdown.vim &gt;&gt; ~/.vim/syntax/vimwiki_markdown.vim
-</code></pre></div>
+by literally <code>cat</code>ing the normal Markdown syntax into vimwiki&rsquo;s:</p>
+
+<pre><code>cat /usr/share/vim/vim74/markdown.vim &gt;&gt; ~/.vim/syntax/vimwiki_markdown.vim
+</code></pre>
+
 <p>Now headers look nice and links work a bit better.</p>
 
 <p>Overall vimwiki is a really fun plugin, but the time-saving features
 could get on your nerves and the Markdown support (which I really want
-to use so I&#39;m not limited to vimwiki) isn&#39;t perfect yet. You could just
+to use so I&rsquo;m not limited to vimwiki) isn&rsquo;t perfect yet. You could just
 work with a collection of normal Markdown files, and maybe a few
 bindings to make new files easier.</p>
 
 <p>In my ideal world, I would write a much simpler plugin which only adds a
-few features to Markdown files if they&#39;re in a wiki path, and none of
-that flashy collapse biz. Someday...</p>
+few features to Markdown files if they&rsquo;re in a wiki path, and none of
+that flashy collapse biz. Someday&hellip;</p>
 
   </article>
 

@@ -62,18 +62,21 @@
 
   <article class="post-content">
   <p>On my Lenovo B5400 laptop, I had some issues with ALSA choosing the HDMI audio
-device to be the default. <em>&quot;That&#39;s a bit silly&quot;</em>, I thought, since <a href="https://wiki.archlinux.org/index.php/Advanced_Linu%0Ax_Sound_Architecture#HDMI">Flash can
+device to be the default. <em>&ldquo;That&rsquo;s a bit silly&rdquo;</em>, I thought, since <a href="https://wiki.archlinux.org/index.php/Advanced_Linu
+x_Sound_Architecture#HDMI">Flash can
 only use the default device</a> and in general it makes a bunch of things <strong>really
 awkward</strong>. I just wanna get the right device to be default!</p>
 
 <p>The Arch Wiki provides a helpful solution: however, it also provides a <strong>bad</strong>
 solution (which I initially chose because it was simpler) which only allows
-<strong>one</strong> application to use the device at a time (see <a href="https://wiki.archli%0Anux.org/index.php/Advanced_Linux_Sound_Architecture#Alternative_method">here</a>, due to
-it selecting a default card by <em>&quot;addressing hardware directly&quot;</em>. <a href="https://wiki.archlinux.org/index.php/Advanced_Linux_Sound_Architecture#%0ASet_the_default_sound_card">A better
+<strong>one</strong> application to use the device at a time (see <a href="https://wiki.archli
+nux.org/index.php/Advanced_Linux_Sound_Architecture#Alternative_method">here</a>, due to
+it selecting a default card by <em>&ldquo;addressing hardware directly&rdquo;</em>. <a href="https://wiki.archlinux.org/index.php/Advanced_Linux_Sound_Architecture#
+Set_the_default_sound_card">A better
 method</a> is mentioned before that solution.</p>
 
 <p>In short, create a <code>*.conf</code> file in <code>/etc/modprobe.d</code> (e.g. <code>/etc/modprobe.d/
-alsa-base.conf</code>) and set your preferred sound card order. I won&#39;t repeat the
+alsa-base.conf</code>) and set your preferred sound card order. I won&rsquo;t repeat the
 Arch Wiki, but I will point to my modprobe config file: <a href="https://github.com/raehik/b5400files/blob/master/etc/modprobe.d/alsa-base.conf">raehik/b5400files</a></p>
 
 <p>I use <code>index=-2</code> to make sure the card which used to be made default (HDMI
