@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Musings of a Linux dev</title>
+    <description>Guides on Linux things and essays on computer-related topics.</description>
+    <link>raehik.github.io/</link>
+    <atom:link href="raehik.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Thu, 12 Feb 2015 11:57:34 +0000</pubDate>
+    <lastBuildDate>Thu, 12 Feb 2015 11:57:34 +0000</lastBuildDate>
+    <generator>Jekyll v2.5.3</generator>
+    
+      <item>
+        <title>Writing a custom Redcarpet renderer</title>
+        <description>&lt;h2&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;When I&amp;#39;m writing I don&amp;#39;t like interrupting my train of thought. It
+easily occurs when I decide &amp;quot;ooh, this is a nice song, let me Google the
+artist&amp;quot; or when I&amp;#39;m experiencing &lt;a href=&quot;!Wikipedia&quot;&gt;presque vu&lt;/a&gt; and resolve to
+find a more fitting word (I had to Google for that word, by the way).
+Another of the more irritating issues I&amp;#39;ve had is linking to pages in my
+writing. I frequently link to two websites in particular,
+&lt;a href=&quot;https://github.com&quot;&gt;GitHub&lt;/a&gt; and &lt;a href=&quot;https://en.wikipedia.org&quot;&gt;Wikipedia&lt;/a&gt;.
+Having to Google the page I want, click on it, copy the URL and finally
+paste it into my terminal is tedious and sometimes I lose focus and end
+up browsing the Internet.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://gwern.net&quot;&gt;Gwern&lt;/a&gt;, a writer I follow who writes extensively in
+almost uncountable disciplines, keeps the source for his website in a
+GitHub repo at &lt;a href=&quot;!GitHub&quot;&gt;gwern/gwern.net&lt;/a&gt;. By checking a few pages I
+learn how he frequently links to &lt;a href=&quot;http://www.gwern.net/haskell/Wikipedia%20Archive%20Bot&quot;&gt;five or more Wikipedia pages in one
+sentence&lt;/a&gt;: he doesn&amp;#39;t write a URL, instead linking to
+&lt;code&gt;(!Wikipedia)&lt;/code&gt;. Clearly there&amp;#39;s some clever stuff going on here.&lt;/p&gt;
+
+&lt;p&gt;His &lt;a href=&quot;!GitHub&quot; title=&quot;gwern/gwern.net/blob/master/hakyll.hs&quot;&gt;Hakyll configuration file&lt;/a&gt; has some stuff about so
+called &lt;a href=&quot;!GitHub&quot; title=&quot;gwern/gwern.net/blob/master/hakyll.hs#L117&quot;&gt;&amp;#39;interwiki links&amp;#39;&lt;/a&gt;. The actual processing
+happens in &lt;a href=&quot;!GitHub&quot; title=&quot;gwern/gwern.net/blob/master/haskell/interwiki-compile.hs&quot;&gt;haskell/interwiki-compile.hs&lt;/a&gt;, and it&amp;#39;s... pretty
+unreadable if you&amp;#39;re like me and don&amp;#39;t know Haskell. But the abstract
+idea is very simple: rather than linking to a page, you specify the
+&lt;em&gt;website name&lt;/em&gt; and a &lt;em&gt;query&lt;/em&gt; (e.g. the Wikipedia page on &lt;a href=&quot;!Wikipedia&quot;&gt;Stanley
+Kubrick&lt;/a&gt;) and a link to the website with the query is formed
+in the HTML. By using this simple short syntax, you can link to pages
+much more fluidly and with hardly a second&amp;#39;s interruption, though using
+non-canonical Markdown syntax. (Then again, if you&amp;#39;re using Jekyll, you
+likely don&amp;#39;t care about that.)&lt;/p&gt;
+
+&lt;p&gt;Gwern &lt;a href=&quot;!GitHub&quot; title=&quot;jgm/gitit/blob/master/plugins/Interwiki.hs&quot;&gt;originally wrote the function&lt;/a&gt; to make it easier
+to create links between public &lt;a href=&quot;!Wikipedia&quot; title=&quot;Wiki&quot;&gt;wikis&lt;/a&gt; on the
+Internet. I wanted to generalise it further and allow whatever
+&amp;#39;interwiki links&amp;#39; you wanted. I named these links &lt;strong&gt;shortlinks&lt;/strong&gt; because
+hey, they&amp;#39;re links but a bit shorter.&lt;/p&gt;
+
+&lt;h2&gt;Implementation&lt;/h2&gt;
+
+&lt;p&gt;Now the question is posed: how to implement shortlink conversion?
+I tried writing a &lt;a href=&quot;!GitHub&quot; title=&quot;raehik/mdwiki-preprocess&quot;&gt;Markdown
+preprocessor&lt;/a&gt; before and it soon
+became clear that I&amp;#39;d have to write a full Markdown parser to understand
+where not to convert shortlinks. I chose to write a custom RedCarpet
+renderer since it&amp;#39;s the converter I use for general use (TODO) and
+Jekyll. After a bit of reading on the &lt;a href=&quot;!GitHub&quot; title=&quot;vmg/redcarpet&quot;&gt;RedCarpet GitHub
+repo&lt;/a&gt; I found it reasonably straightforward how
+to create one.&lt;/p&gt;
+
+&lt;p&gt;The specification for my shortlink renderer follows:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Valid shortlinks begin with an identifier string (I&amp;#39;m using Gwern&amp;#39;s
+&amp;#39;!&amp;#39;) and exist in the hash which maps website names to URLs.&lt;/li&gt;
+&lt;li&gt;Shortlinks are converted to links which combines the query string
+with the website URL.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If possible, I also wanted to implement another feature Gwern&amp;#39;s syntax
+has, which is that &lt;em&gt;links with an empty link&lt;/em&gt; (i.e. just a title) are
+converted to links pointing to the title. For example:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[i/relative-img.png]()
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;would be treated as&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[i/relative-img.png](i/relative-img.png)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I don&amp;#39;t want to change anything else in the Markdown conversion.&lt;/p&gt;
+
+&lt;p&gt;RedCarpet lets you extend the default renderer, and some impressive Ruby
+magic allows you to override only the parts of syntax you want to change
+(even though the renderer is written in C). To make a new renderer for
+shortlinks, I could write this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;redcarpet&amp;quot;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HTMLWithShortlinks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Redcarpet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Render&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;HTML&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;link&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;link&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The overridden &lt;code&gt;link&lt;/code&gt; method needs to check the link for a shortlink,
+edit the link to form if one is present and return an &lt;code&gt;&amp;lt;a&amp;gt;&lt;/code&gt; tag. Pretty
+simple!&lt;/p&gt;
+
+&lt;p&gt;The only gripe with overriding Redcarpet&amp;#39;s HTML renderer is that you
+can&amp;#39;t use the original method using &lt;code&gt;super&lt;/code&gt; because, as I mentioned
+before, it&amp;#39;s written in C with a Ruby API. Luckily in this case it&amp;#39;s no
+issue, because &lt;code&gt;&amp;lt;a&amp;gt;&lt;/code&gt; tags are simple to form.&lt;/p&gt;
+
+&lt;h2&gt;My shortlink renderer&lt;/h2&gt;
+
+&lt;p&gt;My renderer at &lt;a href=&quot;!GitHub&quot;&gt;raehik/redcarpet-shortlink&lt;/a&gt; does the shortlink
+processing and also checks for empty links. I also copied the rest of
+Gwern&amp;#39;s features such as forming a title for shortlinks and letting you
+choose a custom query by setting a title for the shortlink. For example:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[raehik/redcarpet-shortlink](!GitHub)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;would become&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;https://github.com/raehik/redcarpet-shortlink&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;title=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;GitHub: raehik/redcarpet-shortlink&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;raehik/redcarpet-shortlink&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;while&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[My shortlink renderer](!GitHub &amp;quot;raehik/redcarpet-shortlink&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;is converted to&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;https://github.com/raehik/redcarpet-shortlink&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;title=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;GitHub: raehik/redcarpet-shortlink&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;My shortlink renderer&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Since the &lt;code&gt;link&lt;/code&gt; method I wrote must override all of the processing
+originally done by the C HTML renderer, I&amp;#39;ve tried to make sure normal
+links are formed identically (or at least correctly). So far I&amp;#39;m quite
+sure my renderer hasn&amp;#39;t formed a bad link, but I&amp;#39;m not very sure about
+HTML-escaping. If you find any bugs, please &lt;a href=&quot;!GitHub&quot; title=&quot;raehik/redcarpet-shortlink/issues&quot;&gt;create an
+issue&lt;/a&gt; on the GitHub repo.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;(Note: I tried to use shortlinks as much as possible in this post.
+&lt;a href=&quot;!GitHub&quot; title=&quot;raehik/raehik.github.io/blob/master/_posts/2015-02-12-writing-a-custom-redcarpet-renderer.md&quot;&gt;Read the source&lt;/a&gt; if you&amp;#39;d like to see all the occurences.)&lt;/em&gt;&lt;/p&gt;
+</description>
+        <pubDate>Thu, 12 Feb 2015 00:00:00 +0000</pubDate>
+        <link>raehik.github.io/2015/02/12/writing-a-custom-redcarpet-renderer/</link>
+        <guid isPermaLink="true">raehik.github.io/2015/02/12/writing-a-custom-redcarpet-renderer/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>More personal tracking: Last.fm</title>
+        <description>&lt;p&gt;In my quest for further methods of &lt;a href=&quot;/2014/10/08/things-that-are-cool-analysing-your-life/&quot;&gt;logging things I do&lt;/a&gt;, I came
+across &lt;a href=&quot;http://www.last.fm&quot;&gt;Last.fm&lt;/a&gt; a couple months ago, and I have
+some (good) things to say about it. &lt;/p&gt;
+
+&lt;p&gt;Last.fm is a big ol&amp;#39; music database (not as elaborate as
+&lt;a href=&quot;http://musicbrainz.org&quot;&gt;MusicBrainz&lt;/a&gt; with a killer feature: being able
+to make a log of every track you listen to. The verb used for this is
+&lt;em&gt;scrobbling&lt;/em&gt;. A &lt;em&gt;scrobble&lt;/em&gt; is a message you send to Last.fm confirming
+that you listened to a certain song at a certain time.&lt;/p&gt;
+
+&lt;p&gt;If you&amp;#39;re averse to giving corporations &amp;#39;personal&amp;#39; (somewhat) data, you
+can use a local scrobbler. There are a few Last.fm scrobblers around
+which can keep a local log too. The main scrobbler I&amp;#39;m using,
+&lt;a href=&quot;http://manpages.ubuntu.com/manpages/utopic/man1/mpdscribble.1.html&quot;&gt;mpdscribble&lt;/a&gt;, can record songs &lt;a href=&quot;http://www.musicpd.org/&quot;&gt;MPD&lt;/a&gt; plays
+in a very simple log file as well as submitting to Last.fm and other
+audioscrobblers, so there&amp;#39;s something to look at if you use MPD.&lt;/p&gt;
+
+&lt;p&gt;If you don&amp;#39;t mind Last.fm holding your data but like keeping backups of
+your, then you&amp;#39;re in luck. They provide a very nice - if rather slow -
+&lt;a href=&quot;http://www.last.fm/settings/dataexporter&quot;&gt;data export service&lt;/a&gt;. About 3 days after I requested my archive (only
+having accrued a measly &amp;lt;1000 scrobbles over the week I&amp;#39;d had my account
+for), I received an email with a link which lasts only &lt;a href=&quot;https://www.youtube.com/watch?v=nEi02bHQ4rU&amp;amp;t=30s&quot;&gt;7 days&lt;/a&gt;. Seems
+a bit stingy, but they kindly provide separate CSV and JSON files, and
+timestamp using combined Unix times and ISO time formats which makes me
+feel warm inside :)&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;(Note: The export feature seems to be recent, since the zip file your
+data comes in includes a &lt;code&gt;readme.txt&lt;/code&gt; with only the contents &lt;code&gt;Fill me
+out&lt;/code&gt;. They also mention on the export page that it&amp;#39;s experimental.
+Hopefully it&amp;#39;ll be improved eventually!)&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Scrobbling appeals to me greatly because, hell, it&amp;#39;s more statistics
+about myself. I like to think I might have a use for all my data one
+day. Who knows -- maybe it&amp;#39;ll somehow come in handy like [recorded shell
+commands][].&lt;/p&gt;
+
+&lt;p&gt;[recorded shell commands]: post_url command-sleuthing&lt;/p&gt;
+</description>
+        <pubDate>Tue, 27 Jan 2015 00:00:00 +0000</pubDate>
+        <link>raehik.github.io/2015/01/27/more-personal-tracking-lastfm/</link>
+        <guid isPermaLink="true">raehik.github.io/2015/01/27/more-personal-tracking-lastfm/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>vimwiki: Cool, but not enough Markdown</title>
+        <description>&lt;p&gt;I&amp;#39;m having fun with &lt;a href=&quot;https://github.com/vimwiki/vimwiki&quot;&gt;vimwiki&lt;/a&gt; at the moment. It&amp;#39;s an interesting Vim
+plugin which turns your editor into not only a wiki editor, but a viewer
+as well. Here&amp;#39;s what I mean:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/vimwiki-example.png&quot; alt=&quot;vimwiki example&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;The coolest thing about vimwiki is its automatic line squashing. All
+lines except the current one have their formatting syntax removed,
+leaving just the text &amp;amp; formatting. Links are also squashed down into
+just the link text, which is &lt;em&gt;really&lt;/em&gt; cool. I&amp;#39;ll admit I don&amp;#39;t like
+those features all the time -- but it&amp;#39;s also pretty undeniably cool for
+a Vim plugin.&lt;/p&gt;
+
+&lt;p&gt;The other really nice features are the clever new file-making. By simply
+hitting Enter on a word in normal mode (or on a selection in visual
+mode) you make it a link to a corresponding wiki page. Hitting Enter on
+a wiki link follows that link, then you can go back to the previous
+file (and keep your cursor location!) by hitting Backspace.&lt;/p&gt;
+
+&lt;p&gt;However, I feel it&amp;#39;s a little let down by its awkward syntax. vimwiki
+comes with its own syntax by default which has some gripes and is just
+dissimilar to Markdown enough that I don&amp;#39;t feel comfortable using it.
+The Markdown support is subpar (even though many of the squashing
+features still work partially) and by default overrides Vim&amp;#39;s Markdown
+syntax highlighting, which works a lot better.&lt;/p&gt;
+
+&lt;p&gt;I was quite amused when I found I could fix some of the Markdown issues
+by literally &lt;code&gt;cat&lt;/code&gt;ing the normal Markdown syntax into vimwiki&amp;#39;s:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;cat /usr/share/vim/vim74/markdown.vim &amp;gt;&amp;gt; ~/.vim/syntax/vimwiki_markdown.vim
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now headers look nice and links work a bit better.&lt;/p&gt;
+
+&lt;p&gt;Overall vimwiki is a really fun plugin, but the time-saving features
+could get on your nerves and the Markdown support (which I really want
+to use so I&amp;#39;m not limited to vimwiki) isn&amp;#39;t perfect yet. You could just
+work with a collection of normal Markdown files, and maybe a few
+bindings to make new files easier.&lt;/p&gt;
+
+&lt;p&gt;In my ideal world, I would write a much simpler plugin which only adds a
+few features to Markdown files if they&amp;#39;re in a wiki path, and none of
+that flashy collapse biz. Someday...&lt;/p&gt;
+</description>
+        <pubDate>Sun, 16 Nov 2014 11:14:36 +0000</pubDate>
+        <link>raehik.github.io/2014/11/16/vimwiki-not-enough-markdown/</link>
+        <guid isPermaLink="true">raehik.github.io/2014/11/16/vimwiki-not-enough-markdown/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Commandline master race</title>
+        <description>&lt;p&gt;I&amp;#39;m almost finished moving all my major programs over to a
+terminal-based equivalent! Just set up mutt with offlineimap to work
+with my Gmail account and it seems pretty fun.&lt;/p&gt;
+
+&lt;p&gt;My current list of interactive terminal apps in constant use includes:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://irssi.org&quot;&gt;irssi&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://calcurse.org&quot;&gt;calcurse&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.vim.org&quot;&gt;vim&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.musicpd.org&quot;&gt;mpd&lt;/a&gt; + &lt;a href=&quot;http://ncmpcpp.rybczak.net&quot;&gt;ncmpcpp&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.mutt.org&quot;&gt;mutt&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So I&amp;#39;m pretty set for when the graphical display rapture comes.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 21 Oct 2014 00:14:41 +0100</pubDate>
+        <link>raehik.github.io/2014/10/21/commandline-master-race/</link>
+        <guid isPermaLink="true">raehik.github.io/2014/10/21/commandline-master-race/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Getting to grips with Rails</title>
+        <description>&lt;p&gt;Rails is &lt;em&gt;scary&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;When you type &lt;code&gt;rails new&lt;/code&gt;, lots of files with funny names appear. Things
+like &lt;code&gt;Gemfile&lt;/code&gt;, &lt;code&gt;config.ru&lt;/code&gt; &lt;code&gt;vendor/&lt;/code&gt;, &lt;code&gt;bin&lt;/code&gt;... It&amp;#39;s a little
+overwhelming.&lt;/p&gt;
+
+&lt;p&gt;I didn&amp;#39;t really factor in &amp;quot;learning Rails&amp;quot; into the time it would take
+us to get something running in Setsura -- and that was a grave error,
+considering we &lt;em&gt;finally made the project repo&lt;/em&gt; about 6 months after we
+received the money. (It was everyone&amp;#39;s fault, we were all too lazy.)&lt;/p&gt;
+
+&lt;p&gt;For now, I&amp;#39;m focusing on learning about Rails and other MVC-esque web
+frameworks (Node.js is cool too), so I can understand how we should do
+stuff. Luckily there are like a billion Rails tutorials, so I&amp;#39;ll bet we
+can get some simple things running in a month!&lt;/p&gt;
+</description>
+        <pubDate>Sat, 18 Oct 2014 13:37:38 +0100</pubDate>
+        <link>raehik.github.io/2014/10/18/getting-to-grips-with-rails/</link>
+        <guid isPermaLink="true">raehik.github.io/2014/10/18/getting-to-grips-with-rails/</guid>
+        
+        <category>ruby</category>
+        
+        <category>rails</category>
+        
+        <category>setsura</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>An introduction to Setsura</title>
+        <description>&lt;p&gt;We&amp;#39;ve finally started work proper on the Setsura project. &lt;em&gt;It&amp;#39;s going to
+be a challenge.&lt;/em&gt; I&amp;#39;m planning to write posts on the development process,
+and talk about the problems we face and how we deal with them.&lt;/p&gt;
+
+&lt;p&gt;The original design (before I joined the project) was written in PHP
+with some nice accompanying Javascript and CSS. When I probed into what
+things we might want this service to do, I suggested Ruby on Rails for a
+number of reasons:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;we could code in a more structured manner&lt;/li&gt;
+&lt;li&gt;developers seem to have gotten tired of PHP (I wouldn&amp;#39;t know, I&amp;#39;ve
+never used it :P)&lt;/li&gt;
+&lt;li&gt;it&amp;#39;s the framework for
+&lt;a href=&quot;https://github.com/discourse/discourse&quot;&gt;Discourse&lt;/a&gt; and some other
+things&lt;/li&gt;
+&lt;li&gt;it&amp;#39;s the cool new thing to use&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The big thing was that Discourse is built on Rails 3, and that meant
+that if we did the project in Rails 3, everything would be a &lt;em&gt;lot&lt;/em&gt;
+simpler (I think?). I later found that there is a decent image booru
+software written in Rails 3,
+&lt;a href=&quot;https://github.com/moebooru/moebooru&quot;&gt;moebooru&lt;/a&gt;, so that was even
+better!&lt;/p&gt;
+
+&lt;p&gt;Finally, with some of the integral design choices made, we begin!&lt;/p&gt;
+</description>
+        <pubDate>Tue, 14 Oct 2014 23:48:00 +0100</pubDate>
+        <link>raehik.github.io/2014/10/14/an-introduction-to-setsura/</link>
+        <guid isPermaLink="true">raehik.github.io/2014/10/14/an-introduction-to-setsura/</guid>
+        
+        <category>setsura</category>
+        
+        <category>ruby</category>
+        
+        <category>rails</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Record all X11 keystrokes</title>
+        <description>&lt;p&gt;This was &lt;strong&gt;NOT&lt;/strong&gt; fun to do. For some reason, though implementing a
+simple keylogger in Linux takes only a few lines, logging &lt;em&gt;complete&lt;/em&gt; and
+&lt;em&gt;neat&lt;/em&gt; data turns out to be much harder than it should be, in my
+opinion.&lt;/p&gt;
+
+&lt;p&gt;Eventually, after searching and researching (and even trying to write my
+own solution in C) I found a &lt;a href=&quot;http://unix.stackexchange.com/a/129171/45676&quot;&gt;Perl
+solution&lt;/a&gt; Stéphane
+Chazelas posted on Unix and Linux SE. It&amp;#39;s entirely unreadable -- but
+hey, it works.&lt;/p&gt;
+
+&lt;p&gt;I threw it up on my GitHub at &lt;a href=&quot;!GitHub&quot;&gt;raehik/xinput-keylog&lt;/a&gt; and made
+some changes, mainly to do with altering the logging format &amp;amp; printing
+to a file rather than &lt;code&gt;stdout&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The log format is&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;seconds.microseconds press/release xkeycode keyname modifiers
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;where press = 1 &amp;amp; release = 0, for example&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;1413114050.181650 1 111 Up 
+1413114050.266941 0 111 Up 
+1413114051.148741 1 50 Shift_L 
+1413114051.320743 1 38 a Shift
+1413114051.567763 0 38 a Shift
+1413114054.334834 1 37 Control_L Shift
+1413114055.660402 1 40 d Shift,Control
+1413114055.738983 0 40 d Shift,Control
+1413114056.272003 0 50 Shift_L Shift,Control
+1413114056.282852 0 37 Control_L Control
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That&amp;#39;s the log just for hitting &amp;quot;[Up]A[Ctrl-Shift-D]&amp;quot; -- very detailed.
+I got to thinking that if I record to a precision higher than a second &amp;amp;
+record button releases as well, I could analyse how I use the keyboard
+extensively, maybe even find out which keys I &amp;#39;lag&amp;#39; on (i.e. release
+only after pressing another button). Maybe someone could write a program
+for that? I&amp;#39;m too lazy :P&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Edit: I now only record to second precision and only keydowns &amp;amp;
+repeats, because wow I stroke a lot of keys. You can still check it out
+in all its Perly glory at &lt;a href=&quot;!GitHub&quot;&gt;raehik/xinput-keylog&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 12 Oct 2014 14:00:00 +0100</pubDate>
+        <link>raehik.github.io/2014/10/12/record-all-x11-keystrokes/</link>
+        <guid isPermaLink="true">raehik.github.io/2014/10/12/record-all-x11-keystrokes/</guid>
+        
+        <category>linux</category>
+        
+        <category>graphical</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Record additional full zsh history</title>
+        <description>&lt;p&gt;I like to keep my shell history free of duplicates and limited size (so
+I don&amp;#39;t have to manually rotate it). However, after reading &lt;a href=&quot;http://blog.stephenwolfram.com/2012/03/the-personal-analytics-of-my-life&quot;&gt;that
+Stephen Wolfram
+post&lt;/a&gt;
+from my &lt;a href=&quot;../../../../2014/10/08/things-that-are-cool-analysing-your-life&quot;&gt;last
+post&lt;/a&gt;,
+I&amp;#39;ve realised just how much I want to see my full command history: the
+embarrassing misspellings, the endless lines of &lt;code&gt;cd&lt;/code&gt; and &lt;code&gt;ls&lt;/code&gt;... It&amp;#39;s a
+neat idea, I want to be able to analyse how I use my computer(s).&lt;/p&gt;
+
+&lt;p&gt;I did &lt;strong&gt;not&lt;/strong&gt; want to change how my actual shell history was stored,
+since I didn&amp;#39;t have a problem with it. So somehow, I would have to store
+all commands I type in a separate file, and preferably easily because I
+am an incredibly lazy hacker. Hmm. (This is where &lt;code&gt;zsh&lt;/code&gt; comes in.)&lt;/p&gt;
+
+&lt;p&gt;For those of you who use it, it should come as no surprise that &lt;code&gt;zsh&lt;/code&gt;
+does indeed have a feature for this. &lt;code&gt;zsh&lt;/code&gt; has some special functions
+you can define which are run on certain events. The &lt;code&gt;zshaddhistory&lt;/code&gt;
+function is executed &lt;em&gt;&amp;quot;when a history line has been read interactively,
+but before it is executed&amp;quot;&lt;/em&gt; according to its entry in &lt;code&gt;zshmisc&lt;/code&gt;. Any
+time you write a command which &lt;code&gt;zsh&lt;/code&gt; can parse, this function will be
+run, as long as you&amp;#39;ve defined it.&lt;/p&gt;
+
+&lt;p&gt;So all we have to do is get &lt;code&gt;zshaddhistory&lt;/code&gt; to write the argument it
+gets to a file. I&amp;#39;d also like to record the current date and time,
+because I want to do more than simply count my commands. This is almost
+&lt;em&gt;too easy&lt;/em&gt;. To your &lt;code&gt;.zshrc&lt;/code&gt;, add:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;zshaddhistory&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;# prepend the current epoch time&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;# $1 includes terminating newline already (see zshmisc(1))&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; -n &lt;span class=&quot;s2&quot;&gt;&amp;quot;$(date &amp;quot;&lt;/span&gt;+%s&lt;span class=&quot;s2&quot;&gt;&amp;quot;) $1&amp;quot;&lt;/span&gt; &amp;gt;&amp;gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$HOME/.zsh_full_history&amp;quot;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now every command you type is logged to &lt;code&gt;$HOME/.zsh_full_history&lt;/code&gt; along
+with the exact time.&lt;/p&gt;
+
+&lt;p&gt;I did come across a small problem with this simple approach: when
+exiting with Ctrl-D, there is no newline present, but &lt;code&gt;zsh&lt;/code&gt; still calls
+&lt;code&gt;zshaddhistory&lt;/code&gt; (with an empty argument). The exit line now looks
+identical to an empty line, which I have rather a lot of in my command
+history. To fix this, we can use another special &lt;code&gt;zsh&lt;/code&gt; function,
+&lt;code&gt;zshexit&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# clean up the line when exiting with Ctrl-D                                    &lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# if Ctrl-D is hit, there isn&amp;#39;t a terminating newline -- so we&amp;#39;ll add a  &lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# useful message which probably won&amp;#39;t ever be written (! specifies an    &lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# event, so it&amp;#39;ll only work surrounded in quotes                         &lt;/span&gt;
+    zshexit&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;                                                              
+        &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;!EXIT!&amp;quot;&lt;/span&gt; &amp;gt;&amp;gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$HOME/.zsh_full_history&amp;quot;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Add that to your &lt;code&gt;.zshrc&lt;/code&gt; too, and every time you exit the shell,
+&lt;code&gt;!EXIT!&lt;/code&gt; will be added to your full history log. I chose that string
+because it&amp;#39;s unlikely to ever be added to the history, since the &amp;#39;!&amp;#39;
+will cause a parse error. If you ever exit the shell with the &lt;code&gt;exit&lt;/code&gt;
+command, then you&amp;#39;ll get this line right after without a date before it.&lt;/p&gt;
+
+&lt;p&gt;Some example history could be:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;1413054363 ls
+1413054364 exit
+!EXIT!
+1413054368 !EXIT!
+1413054377 tail $HOME/.zsh_full_history
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can see that there were 2 exits there: the first done using the
+&lt;code&gt;exit&lt;/code&gt; command, and the second 4 seconds after by Ctrl-D. Originally,
+all that mattered to me was that Ctrl-D lines could be easily skipped
+programatically -- but this also records the time at which you exit a
+shell, which might be cool to look at.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;2014-10-14 edit: I have found that occasionally &lt;code&gt;!EXIT!&lt;/code&gt; will *&lt;/em&gt;not**
+have a date put before it &amp;gt;:( -- I fixed this by appending the date
+after !EXIT! every time:*&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;zshexit&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;!EXIT! $(date &amp;quot;&lt;/span&gt;+%s&lt;span class=&quot;s2&quot;&gt;&amp;quot;)&amp;quot;&lt;/span&gt; &amp;gt;&amp;gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$HOME/.zsh_full_history&amp;quot;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;This does mean that properly-formed exit lines have another date on
+the end (usually the same, though rarely a second later), but that can
+just be disregarded when looking at it. It at least means that *&lt;/em&gt;all**
+exit lines have a date attached.*&lt;/p&gt;
+
+&lt;p&gt;... Now I feel it&amp;#39;s not complete, that I need to log when shells start
+too. This is pretty simple, as you&amp;#39;d imagine: since &lt;code&gt;.zshrc&lt;/code&gt; is read by
+interactive shells on startup, we add just one line to it:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$(date &amp;quot;&lt;/span&gt;+%s&lt;span class=&quot;s2&quot;&gt;&amp;quot;) !START!&amp;quot;&lt;/span&gt; &amp;gt;&amp;gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$HOME/.zsh_full_history&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And that&amp;#39;s that! Now you can be safe in the knowledge that your shell
+history is being logged, if that makes you feel safe for any reason.
+Eventually I&amp;#39;ll write a program to parse and analyse the log to get some
+nice figures.&lt;/p&gt;
+
+&lt;p&gt;(The examples in this post are not identical to what is in my &lt;code&gt;.zshrc&lt;/code&gt;:
+see
+&lt;a href=&quot;https://github.com/raehik/dotfiles/blob/master/home/.zshrc&quot;&gt;raehik/dotfiles/home/.zshrc&lt;/a&gt;
+for my full config.)&lt;/p&gt;
+</description>
+        <pubDate>Sun, 12 Oct 2014 13:48:15 +0100</pubDate>
+        <link>raehik.github.io/2014/10/12/record-additional-full-zsh-history/</link>
+        <guid isPermaLink="true">raehik.github.io/2014/10/12/record-additional-full-zsh-history/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Things that are cool: Analysing your life</title>
+        <description>&lt;p&gt;Stephen Wolfram&amp;#39;s post &lt;a href=&quot;http://blog.stephenw%0Aolfram.com/2012/03/the-personal-analytics-of-my-life/&quot;&gt;The Personal Analytics of My Life&lt;/a&gt; is super interesting.
+He presents and analyses a &lt;em&gt;wealth&lt;/em&gt; of data he has collected on himself. Some
+sources go back to 1989: he has archived a total of &lt;strong&gt;23 years of email&lt;/strong&gt;!&lt;/p&gt;
+
+&lt;p&gt;I think it&amp;#39;s incredible to be able to summarise bits of your life. As Mr.
+Wolfram puts it, it is &lt;em&gt;&amp;quot;in an effort at “self awareness”&amp;quot;&lt;/em&gt;. It&amp;#39;s something I
+really want to do. Some systems are easy to implement, too, e.g. recording your
+shell history.&lt;/p&gt;
+
+&lt;p&gt;But at the same time, it&amp;#39;s kinda sad. From my 10,000 line shell history file,
+weThese are the most run commands in my
+shell (note: the history file only stores the most recent 10,000 lines):&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;history&lt;/span&gt; -n &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; sort -h &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; uniq -c &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; sort -hr &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; head -n10
+       &lt;span class=&quot;m&quot;&gt;2613&lt;/span&gt; ls
+        &lt;span class=&quot;m&quot;&gt;322&lt;/span&gt; git s
+        &lt;span class=&quot;m&quot;&gt;285&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;        &lt;/span&gt;&lt;span class=&quot;m&quot;&gt;252&lt;/span&gt; ll
+        &lt;span class=&quot;m&quot;&gt;237&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ../
+        &lt;span class=&quot;m&quot;&gt;134&lt;/span&gt; rmvim
+        &lt;span class=&quot;m&quot;&gt;125&lt;/span&gt; ncmpcpp
+         &lt;span class=&quot;m&quot;&gt;88&lt;/span&gt; git push
+         &lt;span class=&quot;m&quot;&gt;87&lt;/span&gt; sh .fehbg
+         &lt;span class=&quot;m&quot;&gt;77&lt;/span&gt; la&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;ll&lt;/code&gt; and &lt;code&gt;la&lt;/code&gt; are both aliases for &lt;code&gt;ls&lt;/code&gt; (see &lt;a href=&quot;https://github/com/raehik/dotfiles/blob/master/home/.shellrc&quot;&gt;my .shellrc&lt;/a&gt;), so it can
+be seen quite clearly that &lt;em&gt;almost a third of my commands involve listing the current directory&amp;#39;s
+contents&lt;/em&gt;. One of my scripts &lt;a href=&quot;!GitHub&quot;&gt;raehik/rmvim&lt;/a&gt; is also quite
+common.&lt;/p&gt;
+
+&lt;p&gt;I will endeavour to get something running to record and store data on my shell
+commands, and probably post about what I did plus how &amp;amp; why.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 08 Oct 2014 13:44:01 +0100</pubDate>
+        <link>raehik.github.io/2014/10/08/things-that-are-cool-analysing-your-life/</link>
+        <guid isPermaLink="true">raehik.github.io/2014/10/08/things-that-are-cool-analysing-your-life/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Fixing ALSA default device issues</title>
+        <description>&lt;p&gt;On my Lenovo B5400 laptop, I had some issues with ALSA choosing the HDMI audio
+device to be the default. &lt;em&gt;&amp;quot;That&amp;#39;s a bit silly&amp;quot;&lt;/em&gt;, I thought, since &lt;a href=&quot;https://wiki.archlinux.org/index.php/Advanced_Linu%0Ax_Sound_Architecture#HDMI&quot;&gt;Flash can
+only use the default device&lt;/a&gt; and in general it makes a bunch of things &lt;strong&gt;really
+awkward&lt;/strong&gt;. I just wanna get the right device to be default!&lt;/p&gt;
+
+&lt;p&gt;The Arch Wiki provides a helpful solution: however, it also provides a &lt;strong&gt;bad&lt;/strong&gt;
+solution (which I initially chose because it was simpler) which only allows
+&lt;strong&gt;one&lt;/strong&gt; application to use the device at a time (see &lt;a href=&quot;https://wiki.archli%0Anux.org/index.php/Advanced_Linux_Sound_Architecture#Alternative_method&quot;&gt;here&lt;/a&gt;, due to
+it selecting a default card by &lt;em&gt;&amp;quot;addressing hardware directly&amp;quot;&lt;/em&gt;. &lt;a href=&quot;https://wiki.archlinux.org/index.php/Advanced_Linux_Sound_Architecture#%0ASet_the_default_sound_card&quot;&gt;A better
+method&lt;/a&gt; is mentioned before that solution.&lt;/p&gt;
+
+&lt;p&gt;In short, create a &lt;code&gt;*.conf&lt;/code&gt; file in &lt;code&gt;/etc/modprobe.d&lt;/code&gt; (e.g. &lt;code&gt;/etc/modprobe.d/
+alsa-base.conf&lt;/code&gt;) and set your preferred sound card order. I won&amp;#39;t repeat the
+Arch Wiki, but I will point to my modprobe config file: &lt;a href=&quot;https://github.com/raehik/b5400files/blob/master/etc/modprobe.d/alsa-base.conf&quot;&gt;raehik/b5400files&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;I use &lt;code&gt;index=-2&lt;/code&gt; to make sure the card which used to be made default (HDMI
+audio) is never chosen as the first/primary/default card. Safe and simple
+solution.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 27 Sep 2014 14:34:37 +0100</pubDate>
+        <link>raehik.github.io/2014/09/27/fixing-alsa-default-device-issues/</link>
+        <guid isPermaLink="true">raehik.github.io/2014/09/27/fixing-alsa-default-device-issues/</guid>
+        
+        
+      </item>
+    
+  </channel>
+</rss>
