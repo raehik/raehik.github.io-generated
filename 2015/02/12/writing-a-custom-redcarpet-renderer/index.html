@@ -108,9 +108,9 @@ hey, they&rsquo;re links but a bit shorter.</p>
 I tried writing a <a href="https://github.com/raehik/mdwiki-preprocess" title="GitHub: raehik/mdwiki-preprocess">Markdown
 preprocessor</a> before and it soon
 became clear that I&rsquo;d have to write a full Markdown parser to understand
-where not to convert shortlinks. I chose to write a custom RedCarpet
+where not to convert shortlinks. I chose to write a custom Redcarpet
 renderer since it&rsquo;s the converter I use for general use (TODO) and
-Jekyll. After a bit of reading on the <a href="https://github.com/vmg/redcarpet" title="GitHub: vmg/redcarpet">RedCarpet GitHub
+Jekyll. After a bit of reading on the <a href="https://github.com/vmg/redcarpet" title="GitHub: vmg/redcarpet">Redcarpet GitHub
 repo</a> I found it reasonably straightforward how
 to create one.</p>
 
@@ -137,7 +137,7 @@ converted to links pointing to the title. For example:</p>
 
 <p>I don&rsquo;t want to change anything else in the Markdown conversion.</p>
 
-<p>RedCarpet lets you extend the default renderer, and some impressive Ruby
+<p>Redcarpet lets you extend the default renderer, and some impressive Ruby
 magic allows you to override only the parts of syntax you want to change
 (even though the renderer is written in C). To make a new renderer for
 shortlinks, I could write this:</p>
