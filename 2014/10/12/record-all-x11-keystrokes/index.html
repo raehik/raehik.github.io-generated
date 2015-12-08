@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="raehik.github.io/2014/10/12/record-all-x11-keystrokes/">
-  <link rel="alternate" type="application/rss+xml" title="Musings of a Linux dev" href="raehik.github.io/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Diaries of a Script Kiddie" href="raehik.github.io/feed.xml" />
 </head>
 
 
@@ -21,7 +21,7 @@
 
   <div class="wrapper">
 
-    <a class="site-title" href="/">Musings of a Linux dev</a>
+    <a class="site-title" href="/">Diaries of a Script Kiddie</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -73,18 +73,15 @@ solution</a> Stéphane
 Chazelas posted on Unix and Linux SE. It&rsquo;s entirely unreadable &ndash; but
 hey, it works.</p>
 
-<p>I threw it up on my GitHub at <a href="https://github.com/raehik/xinput-keylog" title="GitHub: raehik/xinput-keylog">raehik/xinput-keylog</a> and made
+<p>I threw it up on my GitHub at <a href="!GitHub">raehik/xinput-keylog</a> and made
 some changes, mainly to do with altering the logging format &amp; printing
 to a file rather than <code>stdout</code>.</p>
 
 <p>The log format is</p>
-
-<pre><code>seconds.microseconds press/release xkeycode keyname modifiers
-</code></pre>
-
+<div class="highlight"><pre>seconds.microseconds press/release xkeycode keyname modifiers
+</pre></div>
 <p>where press = 1 &amp; release = 0, for example</p>
-
-<pre><code>1413114050.181650 1 111 Up 
+<div class="highlight"><pre>1413114050.181650 1 111 Up 
 1413114050.266941 0 111 Up 
 1413114051.148741 1 50 Shift_L 
 1413114051.320743 1 38 a Shift
@@ -94,8 +91,7 @@ to a file rather than <code>stdout</code>.</p>
 1413114055.738983 0 40 d Shift,Control
 1413114056.272003 0 50 Shift_L Shift,Control
 1413114056.282852 0 37 Control_L Control
-</code></pre>
-
+</pre></div>
 <p>That&rsquo;s the log just for hitting &ldquo;[Up]A[Ctrl-Shift-D]&rdquo; &ndash; very detailed.
 I got to thinking that if I record to a precision higher than a second &amp;
 record button releases as well, I could analyse how I use the keyboard
@@ -105,7 +101,7 @@ for that? I&rsquo;m too lazy :P</p>
 
 <p><em>Edit: I now only record to second precision and only keydowns &amp;
 repeats, because wow I stroke a lot of keys. You can still check it out
-in all its Perly glory at <a href="https://github.com/raehik/xinput-keylog" title="GitHub: raehik/xinput-keylog">raehik/xinput-keylog</a>.</em></p>
+in all its Perly glory at <a href="!GitHub">raehik/xinput-keylog</a>.</em></p>
 
   </article>
 
@@ -118,12 +114,12 @@ in all its Perly glory at <a href="https://github.com/raehik/xinput-keylog" titl
 
   <div class="wrapper">
 
-    <h2 class="footer-heading">Musings of a Linux dev</h2>
+    <h2 class="footer-heading">Diaries of a Script Kiddie</h2>
 
     <div class="footer-col-wrapper">
       <div class="footer-col  footer-col-1">
         <ul class="contact-list">
-          <li>Musings of a Linux dev</li>
+          <li>Diaries of a Script Kiddie</li>
           <li><a href="mailto:thefirstmuffinman@gmail.com">thefirstmuffinman@gmail.com</a></li>
         </ul>
       </div>
@@ -162,7 +158,7 @@ in all its Perly glory at <a href="https://github.com/raehik/xinput-keylog" titl
       </div>
 
       <div class="footer-col  footer-col-3">
-        <p class="text">Guides on Linux things and essays on computer-related topics.</p>
+        <p class="text">Musings and guides on tech with a Linux slant.</p>
       </div>
     </div>
 

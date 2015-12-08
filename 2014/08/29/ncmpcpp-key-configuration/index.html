@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="raehik.github.io/2014/08/29/ncmpcpp-key-configuration/">
-  <link rel="alternate" type="application/rss+xml" title="Musings of a Linux dev" href="raehik.github.io/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Diaries of a Script Kiddie" href="raehik.github.io/feed.xml" />
 </head>
 
 
@@ -21,7 +21,7 @@
 
   <div class="wrapper">
 
-    <a class="site-title" href="/">Musings of a Linux dev</a>
+    <a class="site-title" href="/">Diaries of a Script Kiddie</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -81,31 +81,25 @@ doesn&rsquo;t explain where the decimal value <em>comes</em> from for each key.<
 uses ASCII key codes.</strong> So, if you wanted to bind the Escape key to the
 <code>key_quit</code> command (mapped to &#39;q&rsquo; and &#39;Q&rsquo; by default), then you might follow
 this procedure:</p>
-
-<pre><code>$ showkey -a # show ASCII codes
+<div class="highlight"><pre>$ showkey -a # show ASCII codes
 
 Press any keys - Ctrl-D wil terminate this program
 
 ^[       27 0033 0x1b
-</code></pre>
-
+</pre></div>
 <p>Ah, so the ASCII code for Escape is 27. (You could alternatively check on a
 website such as <a href="http://www.ascii-code.com">ascii-code.com</a>.)</p>
 
 <p>Now go into your <code>~/.ncmpcpp/keys</code> file (if it doesn&rsquo;t exist, I suggest copying
 the template from <code>/usr/share/doc/ncmpcpp/keys</code> &ndash; or grab my one from
 <a href="https://github.com/raehik/dotfiles">raehik/dotfiles</a>!) and add this line:</p>
-
-<pre><code>key_quit = 27
-</code></pre>
-
+<div class="highlight"><pre>key_quit = 27
+</pre></div>
 <p>And that&rsquo;s that. <code>ncmpcpp</code> will now quit if you hit Escape instead of &#39;q&rsquo;. My
 reason for doing this was actually binding &#39;q&rsquo; <strong>and</strong> Escape to quit, so my
 line looks like this:</p>
-
-<pre><code>key_quit = &#39;q&#39; 27
-</code></pre>
-
+<div class="highlight"><pre>key_quit = &#39;q&#39; 27
+</pre></div>
   </article>
 
 </div>
@@ -117,12 +111,12 @@ line looks like this:</p>
 
   <div class="wrapper">
 
-    <h2 class="footer-heading">Musings of a Linux dev</h2>
+    <h2 class="footer-heading">Diaries of a Script Kiddie</h2>
 
     <div class="footer-col-wrapper">
       <div class="footer-col  footer-col-1">
         <ul class="contact-list">
-          <li>Musings of a Linux dev</li>
+          <li>Diaries of a Script Kiddie</li>
           <li><a href="mailto:thefirstmuffinman@gmail.com">thefirstmuffinman@gmail.com</a></li>
         </ul>
       </div>
@@ -161,7 +155,7 @@ line looks like this:</p>
       </div>
 
       <div class="footer-col  footer-col-3">
-        <p class="text">Guides on Linux things and essays on computer-related topics.</p>
+        <p class="text">Musings and guides on tech with a Linux slant.</p>
       </div>
     </div>
 
